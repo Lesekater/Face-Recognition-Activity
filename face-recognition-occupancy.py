@@ -5,12 +5,11 @@ import argparse
 import cv2
 from time import sleep
 import paho.mqtt.client as mqtt
-import threading
+from threading import Thread
 import json
 
 State = True
 webcam = None
-Thread_stopped = False
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -56,23 +55,25 @@ print("Subscribing to topic",(config["mqttTopic"] + "/cmd"))
 client.subscribe((config["mqttTopic"] + "/cmd"))
 
 # Define the thread that will continuously pull frames from the camera
-class CameraBufferCleanerThread(threading.Thread):
-    def __init__(self, camera, name='camera-buffer-cleaner-thread'):
-        self.camera = camera
+class CameraBufferCleanerThread:
+    def __init__( self):
+        self._running = True
         self.last_frame = None
-        super(CameraBufferCleanerThread, self).__init__(name=name)
-        self.start()
 
-    def run(self):
-        global Thread_stopped
-        Thread_stopped = False
-        while State:
-            ret, self.last_frame = self.camera.read()
-        Thread_stopped = True
+    def terminate(self):
+        self._running = False
+
+    def run(self, camera):
+        while self._running:
+            ret, self.last_frame = camera.read()
 
 # load our serialized model from disk
 print("[INFO] loading model...")
 net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
+
+# define the cleaning thread
+cam_cleaner = CameraBufferCleanerThread()
+t = None
 
 #main loop
 Startup = True
@@ -80,13 +81,12 @@ while True:
     if State:
         if Startup:
             # startup webcam
-            webcam = cv2.VideoCapture(0)
             print("[INFO] starting up webcam..")
-            for i in range(0, 5):
-                webcam.read()
+            webcam = cv2.VideoCapture(0)
 
             # Start the cleaning thread
-            cam_cleaner = CameraBufferCleanerThread(webcam)
+            t = Thread(target = cam_cleaner.run, args =(webcam, ))
+            t.start()
             Startup = False
         
         if cam_cleaner.last_frame is not None:
@@ -125,6 +125,6 @@ while True:
                 client.publish(config["mqttTopic"], "Unoccupied")
                 # client.publish((config["mqttTopic"] + "/confidence"), str(confidence))
             sleep(2)
-    if not State and Thread_stopped:
+    if not State and not t.is_alive():
         webcam.release()
         Startup = True
