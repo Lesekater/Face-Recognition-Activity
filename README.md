@@ -1,5 +1,5 @@
 # Face-Recognition-Activity
-https://github.com/Lesekater/face-recognition-activity
+https://github.com/Lesekater/Face-Recognition-Activity
 
 A script that checks if a face is detected in a webcam-feed and sends a "occupied" or "unoccupied" state to an mqtt topic
 
