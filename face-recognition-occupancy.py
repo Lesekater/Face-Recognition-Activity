@@ -64,6 +64,7 @@ class CameraBufferCleanerThread:
         self._running = False
 
     def run(self, camera):
+        self._running = True
         while self._running:
             ret, self.last_frame = camera.read()
 
