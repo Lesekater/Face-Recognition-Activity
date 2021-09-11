@@ -56,7 +56,7 @@ client.subscribe((config["mqttTopic"] + "/cmd"))
 
 # Define the thread that will continuously pull frames from the camera
 class CameraBufferCleanerThread:
-    def __init__( self):
+    def __init__(self):
         self._running = True
         self.last_frame = None
 
@@ -125,6 +125,8 @@ while True:
                 client.publish(config["mqttTopic"], "Unoccupied")
                 # client.publish((config["mqttTopic"] + "/confidence"), str(confidence))
             sleep(2)
+    if not State:
+        cam_cleaner.terminate()
     if not State and not t.is_alive():
         webcam.release()
         Startup = True
