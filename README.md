@@ -7,7 +7,9 @@ A script that checks if a face is detected in a webcam-feed and sends a "occupie
 ## Description
 
 ### `face-recognition-occupancy.py`
-TODO
+The Script acceses the local webcam and captures frames at an interval. These Frames are then evaluated by a ml model throught cv2. Based on the result it sends a "occupied" or "unoccupied" state to an mqtt topic.
+
+The Script can be paused and resumed by sending ether "off" or "on" to the _configuredMqttTopic_/cmd.
 
 ---
 
@@ -21,5 +23,5 @@ TODO
 
 1. Download the script.
 2. Install the Dependencies. (pip install requirements.txt)
-3. Configure the Script by creating an config.json (see configExample.json) <-- TODO
+3. Configure the Script by creating an config.json (see configExample.json)
 4. Run the script. (python3 face-recognition-occupancy.py)
