@@ -22,6 +22,6 @@ The Script can be paused and resumed by sending ether "off" or "on" to the _conf
 ## General usage information
 
 1. Download the script.
-2. Install the Dependencies. (pip install requirements.txt)
+2. Install the Dependencies. (pip install -r requirements.txt)
 3. Configure the Script by creating an config.json (see configExample.json)
 4. Run the script. (python3 face-recognition-occupancy.py)
