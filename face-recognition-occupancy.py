@@ -1,5 +1,4 @@
 # import the necessary packages
-from uuid import SafeUUID
 import numpy as np
 import argparse
 import cv2
