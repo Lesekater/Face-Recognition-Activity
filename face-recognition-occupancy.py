@@ -25,7 +25,6 @@ with open("config.json") as conf:
     config = json.load(conf)
 
 # mqtt connection
-# mqtt connection
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
 
@@ -68,11 +67,11 @@ class CameraBufferCleanerThread:
         while self._running:
             ret, self.last_frame = camera.read()
 
-# load our serialized model from disk
+# load serialized model from disk
 print("[INFO] loading model...")
 net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 
-# define the cleaning thread
+# create a cleaning thread object
 cam_cleaner = CameraBufferCleanerThread()
 t = None
 
@@ -127,7 +126,9 @@ while True:
                 # client.publish((config["mqttTopic"] + "/confidence"), str(confidence))
             sleep(2)
     if not State:
+        # terminate the cleaning thread
         cam_cleaner.terminate()
     if not State and not t.is_alive():
+        # stop the webcam and set the startup variable
         webcam.release()
         Startup = True

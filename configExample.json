@@ -1,0 +1,7 @@
+{
+    "mqttUser":"mqttUser",
+    "mqttPass":"mqttPassword",
+    "mqttServer":"MqttServer.Domain",
+    "mqttTopic":"mqtt/topic",
+    "mqttClient":"MqttClientName"
+}
