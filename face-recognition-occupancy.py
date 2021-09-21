@@ -128,11 +128,8 @@ while True:
     if not State:
         # terminate the cleaning thread
         cam_cleaner.terminate()
-    if t == None:
-        # stop the webcam and set the startup variable
-        webcam.release()
-        Startup = True
-    elif not State and not t.is_alive():
-        # stop the webcam and set the startup variable
-        webcam.release()
-        Startup = True
+    if t != None:
+        if not State and not t.is_alive():
+            # stop the webcam and set the startup variable
+            webcam.release()
+            Startup = True
