@@ -25,7 +25,15 @@ with open("config.json") as conf:
 
 # mqtt connection
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
+    if rc == 0:
+        print("Connected with result code " + str(rc))
+
+        print("Subscribing to topic",(config["mqttTopic"] + "/cmd"))
+        client.subscribe((config["mqttTopic"] + "/cmd"))
+    else:
+        print("Bad connection with result code " + str(rc))
+        client.loop_stop()
+        exit(1)
 
 def on_message(client, userdata, message):
     global State
@@ -45,12 +53,13 @@ client.username_pw_set(username=config["mqttUser"], password=config["mqttPass"])
 client.on_connect = on_connect
 client.on_message=on_message #attach function to callback
 
-client.connect(config["mqttServer"], 1883, 60)
+try:
+    client.connect(config["mqttServer"], 1883, 60)
+except:
+    print("Error: MQTT connection failed")
+    exit(1)
 
 client.loop_start()
-
-print("Subscribing to topic",(config["mqttTopic"] + "/cmd"))
-client.subscribe((config["mqttTopic"] + "/cmd"))
 
 # Define the thread that will continuously pull frames from the camera
 class CameraBufferCleanerThread:
