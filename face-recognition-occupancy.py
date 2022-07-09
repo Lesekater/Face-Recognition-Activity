@@ -1,5 +1,4 @@
 # import the necessary packages
-from uuid import SafeUUID
 import numpy as np
 import argparse
 import cv2
@@ -17,7 +16,7 @@ ap.add_argument("-p", "--prototxt", default="deploy.prototxt.txt",
     help="path to Caffe 'deploy' prototxt file")
 ap.add_argument("-m", "--model", default="res10_300x300_ssd_iter_140000.caffemodel",
     help="path to Caffe pre-trained model")
-ap.add_argument("-c", "--confidence", type=float, default=0.3,
+ap.add_argument("-c", "--confidence", type=float, default=0.6,
     help="minimum probability to filter weak detections")
 args = vars(ap.parse_args())
 
@@ -26,7 +25,15 @@ with open("config.json") as conf:
 
 # mqtt connection
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
+    if rc == 0:
+        print("Connected with result code " + str(rc))
+
+        print("Subscribing to topic",(config["mqttTopic"] + "/cmd"))
+        client.subscribe((config["mqttTopic"] + "/cmd"))
+    else:
+        print("Bad connection with result code " + str(rc))
+        client.loop_stop()
+        exit(1)
 
 def on_message(client, userdata, message):
     global State
@@ -46,12 +53,13 @@ client.username_pw_set(username=config["mqttUser"], password=config["mqttPass"])
 client.on_connect = on_connect
 client.on_message=on_message #attach function to callback
 
-client.connect(config["mqttServer"], 1883, 60)
+try:
+    client.connect(config["mqttServer"], 1883, 60)
+except:
+    print("Error: MQTT connection failed")
+    exit(1)
 
 client.loop_start()
-
-print("Subscribing to topic",(config["mqttTopic"] + "/cmd"))
-client.subscribe((config["mqttTopic"] + "/cmd"))
 
 # Define the thread that will continuously pull frames from the camera
 class CameraBufferCleanerThread:
@@ -128,7 +136,8 @@ while True:
     if not State:
         # terminate the cleaning thread
         cam_cleaner.terminate()
-    if not State and not t.is_alive():
-        # stop the webcam and set the startup variable
-        webcam.release()
-        Startup = True
+    if t != None:
+        if not State and not t.is_alive():
+            # stop the webcam and set the startup variable
+            webcam.release()
+            Startup = True
